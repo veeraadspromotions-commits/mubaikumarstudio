@@ -1,0 +1,2147 @@
+<!DOCTYPE html>
+<html lang="ta" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mumbai Kumar Studio | AI Music Director Hub</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & Noto Sans Tamil -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+Tamil:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body {
+      font-family: 'Inter', 'Noto Sans Tamil', sans-serif;
+      background-color: #080b11;
+      color: #f1f5f9;
+    }
+    .eq-bar {
+      transition: height 0.22s ease;
+    }
+    @keyframes spin-slow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .animate-spin-slow {
+      animation: spin-slow 6s linear infinite;
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #f59e0b;
+    }
+  </style>
+</head>
+<body class="min-h-screen pb-32 selection:bg-amber-500 selection:text-slate-950">
+
+  <!-- Hidden HTML5 Audio Player for Uploaded MP3/WAV Files -->
+  <audio id="studio-audio-player" class="hidden"></audio>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed top-5 right-5 z-50 hidden items-center gap-3 px-4 py-3 rounded-2xl bg-slate-900/95 border border-amber-500/60 shadow-2xl text-sm text-amber-200">
+    <i data-lucide="sparkles" class="w-4 h-4 text-amber-400 shrink-0"></i>
+    <span id="toast-text"></span>
+  </div>
+
+  <!-- ==========================================
+       HEADER BAR WITH TAMIL / ENGLISH SWITCHER
+  ========================================== -->
+  <header class="sticky top-0 z-30 backdrop-blur-xl bg-[#080b11]/90 border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- Brand Identity -->
+      <div class="flex items-center gap-3.5">
+        <div class="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 via-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/25 border border-amber-300/40">
+          <i id="header-disc-icon" data-lucide="disc-3" class="w-7 h-7 text-slate-950"></i>
+          <span class="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-[#080b11]" title="Cloud Active"></span>
+        </div>
+        <div>
+          <div class="flex flex-wrap items-center gap-2">
+            <h1 id="ui-brand-title" class="text-xl sm:text-2xl font-extrabold tracking-tight bg-gradient-to-r from-amber-200 via-amber-400 to-orange-400 bg-clip-text text-transparent">
+              MUMBAI KUMAR STUDIO
+            </h1>
+            <span id="ui-brand-badge" class="inline-flex items-center gap-1 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider bg-amber-500/15 text-amber-300 border border-amber-500/30 rounded-full">
+              AI Music Director Hub
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 flex flex-wrap items-center gap-2 mt-0.5">
+            <span id="ui-brand-subtitle">Melody • Folk • Bhakti Cloud Vault & Scene Situation Matcher</span>
+            <span class="inline-flex items-center gap-1 text-emerald-400 font-semibold">
+              <i data-lucide="cloud" class="w-3.5 h-3.5"></i>
+              <span id="cloud-status-label">Cloud Storage Ready</span>
+            </span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Right Action Buttons & Language Switcher -->
+      <div class="flex flex-wrap items-center gap-2">
+        
+        <!-- Prominent Language Switch Button (தமிழ் / English) -->
+        <button
+          onclick="window.appActions.toggleLanguage()"
+          class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500/20 to-orange-500/20 hover:from-amber-500/30 hover:to-orange-500/30 text-amber-300 border border-amber-400/50 text-xs sm:text-sm font-extrabold shadow-md transition-all"
+          title="Switch Language between Tamil and English"
+        >
+          <i data-lucide="languages" class="w-4 h-4 text-amber-400"></i>
+          <span id="lang-toggle-label">தமிழ் / English</span>
+        </button>
+
+        <!-- AI Lyrics & Hook Generator Button -->
+        <button
+          onclick="window.appActions.openLyricsModal()"
+          class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-300 border border-indigo-500/30 text-xs sm:text-sm font-semibold transition-all"
+        >
+          <i data-lucide="wand-2" class="w-4 h-4 text-indigo-400"></i>
+          <span id="ui-btn-lyrics">AI பாடல் வரிகள்</span>
+        </button>
+
+        <!-- Director Shortlist Filter Button -->
+        <button
+          id="btn-shortlist-header"
+          onclick="window.appActions.setCategory('Shortlist')"
+          class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-800 text-slate-200 border border-slate-700 text-xs sm:text-sm font-semibold transition-all"
+        >
+          <i data-lucide="bookmark" class="w-4 h-4 text-amber-400"></i>
+          <span id="ui-btn-shortlist">Shortlist</span>
+          <span id="count-shortlist-header" class="px-1.5 py-0.2 rounded-full text-[11px] bg-amber-500/20 text-amber-300">0</span>
+        </button>
+
+        <!-- Director Pitch Mode Button -->
+        <button
+          id="btn-pitch-mode"
+          onclick="window.appActions.togglePitchMode()"
+          class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-800 text-slate-300 border border-slate-700 text-xs sm:text-sm font-semibold transition-all"
+        >
+          <i data-lucide="presentation" class="w-4 h-4 text-cyan-400"></i>
+          <span id="ui-btn-pitch">Director Pitch View</span>
+        </button>
+
+        <!-- Download HTML for GitHub Pages Button -->
+        <button
+          onclick="window.appActions.openGithubHelpModal()"
+          class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition-all"
+          title="Download ready-to-use index.html for GitHub Pages"
+        >
+          <i data-lucide="download" class="w-4 h-4"></i>
+          <span id="ui-btn-github" class="hidden sm:inline">GitHub HTML</span>
+        </button>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- ==========================================
+       MAIN CONTENT CONTAINER
+  ========================================== -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 pt-6 space-y-8">
+
+    <!-- ==========================================
+         SECTION 1: 3 DEDICATED GENRE CLOUD VAULTS
+         (Melody Song, Folk Song, Bhakti Song)
+    ========================================== -->
+    <section>
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+        <h2 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+          <i data-lucide="layers" class="w-4 h-4 text-amber-400"></i>
+          <span id="ui-sec1-heading">1. பாடல் பிரிவுகள் & கிளவுட் அப்லோட் (Melody, Folk, Bhakti Cloud Vaults)</span>
+        </h2>
+        <button
+          id="btn-show-all-top"
+          onclick="window.appActions.setCategory('All')"
+          class="hidden text-xs font-bold text-amber-400 hover:underline items-center gap-1"
+        >
+          <span id="ui-show-all-link">அனைத்து பாடல்களையும் காட்டு (Show All)</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        
+        <!-- 1. MELODY SONGS VAULT -->
+        <div
+          id="vault-card-Melody"
+          onclick="window.appActions.setCategory('Melody')"
+          class="cursor-pointer group relative overflow-hidden rounded-2xl p-5 border border-slate-800 bg-slate-900/70 hover:bg-slate-900 hover:border-cyan-500/50 transition-all"
+        >
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                <i data-lucide="heart" class="w-3.5 h-3.5"></i>
+                <span id="ui-melody-badge">MELODY SONGS • மெலடி</span>
+              </span>
+              <h3 id="ui-melody-title" class="text-lg font-extrabold text-white mt-2.5">மெலடி பாடல்கள் (Melody)</h3>
+              <p id="ui-melody-desc" class="text-xs text-slate-400 mt-1 leading-relaxed">
+                காதல், மழை இரவு, அம்மா சென்டிமென்ட், சோகம் & மென்மையான பாடல்கள்
+              </p>
+            </div>
+            <div class="text-right shrink-0">
+              <span id="count-card-Melody" class="text-2xl font-black text-cyan-400">0</span>
+              <span id="ui-tracks-label-1" class="block text-[10px] uppercase tracking-wider text-slate-400">பாடல்கள்</span>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between gap-2">
+            <span id="ui-melody-filter-hint" class="text-xs text-cyan-300 font-medium">
+              மெலடி பாடல்களை பார்க்க →
+            </span>
+            <button
+              type="button"
+              onclick="event.stopPropagation(); window.appActions.openUploadModal('Melody')"
+              class="admin-only-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold text-xs shadow-md transition-all"
+            >
+              <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+              <span id="ui-btn-upload-melody">+ Upload Melody</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. FOLK SONGS VAULT -->
+        <div
+          id="vault-card-Folk"
+          onclick="window.appActions.setCategory('Folk')"
+          class="cursor-pointer group relative overflow-hidden rounded-2xl p-5 border border-slate-800 bg-slate-900/70 hover:bg-slate-900 hover:border-amber-500/50 transition-all"
+        >
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                <i data-lucide="drum" class="w-3.5 h-3.5"></i>
+                <span id="ui-folk-badge">FOLK SONGS • நாட்டுப்புறம்</span>
+              </span>
+              <h3 id="ui-folk-title" class="text-lg font-extrabold text-white mt-2.5">நாட்டுப்புற / குத்து (Folk)</h3>
+              <p id="ui-folk-desc" class="text-xs text-slate-400 mt-1 leading-relaxed">
+                ஹீரோ மாஸ் ஓபனிங், கிராமத்து திருவிழா, உறுமி மேளம் & குத்து பாடல்கள்
+              </p>
+            </div>
+            <div class="text-right shrink-0">
+              <span id="count-card-Folk" class="text-2xl font-black text-amber-400">0</span>
+              <span id="ui-tracks-label-2" class="block text-[10px] uppercase tracking-wider text-slate-400">பாடல்கள்</span>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between gap-2">
+            <span id="ui-folk-filter-hint" class="text-xs text-amber-300 font-medium">
+              நாட்டுப்புற பாடல்களை பார்க்க →
+            </span>
+            <button
+              type="button"
+              onclick="event.stopPropagation(); window.appActions.openUploadModal('Folk')"
+              class="admin-only-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs shadow-md transition-all"
+            >
+              <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+              <span id="ui-btn-upload-folk">+ Upload Folk</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3. BHAKTI SONGS VAULT -->
+        <div
+          id="vault-card-Bhakti"
+          onclick="window.appActions.setCategory('Bhakti')"
+          class="cursor-pointer group relative overflow-hidden rounded-2xl p-5 border border-slate-800 bg-slate-900/70 hover:bg-slate-900 hover:border-rose-500/50 transition-all"
+        >
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                <i data-lucide="flame" class="w-3.5 h-3.5"></i>
+                <span id="ui-bhakti-badge">BHAKTI SONGS • பக்தி</span>
+              </span>
+              <h3 id="ui-bhakti-title" class="text-lg font-extrabold text-white mt-2.5">பக்தி பாடல்கள் (Bhakti)</h3>
+              <p id="ui-bhakti-desc" class="text-xs text-slate-400 mt-1 leading-relaxed">
+                கோவில் திருவிழா கிளைமாக்ஸ், அம்மன் அருள், சுப்ரபாதம் & தெய்வீக பாடல்கள்
+              </p>
+            </div>
+            <div class="text-right shrink-0">
+              <span id="count-card-Bhakti" class="text-2xl font-black text-rose-400">0</span>
+              <span id="ui-tracks-label-3" class="block text-[10px] uppercase tracking-wider text-slate-400">பாடல்கள்</span>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between gap-2">
+            <span id="ui-bhakti-filter-hint" class="text-xs text-rose-300 font-medium">
+              பக்தி பாடல்களை பார்க்க →
+            </span>
+            <button
+              type="button"
+              onclick="event.stopPropagation(); window.appActions.openUploadModal('Bhakti')"
+              class="admin-only-btn flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500 hover:bg-rose-400 text-slate-950 font-extrabold text-xs shadow-md transition-all"
+            >
+              <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+              <span id="ui-btn-upload-bhakti">+ Upload Bhakti</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SECTION 2: MULTILINGUAL SCENE SITUATION SEARCH BOX
+         (Supports Tamil, Tanglish, and English)
+    ========================================== -->
+    <section class="relative rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-slate-900 via-[#101626] to-slate-900 border border-amber-500/40 shadow-2xl shadow-amber-500/5">
+      <div class="max-w-4xl mx-auto">
+        
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+          <div class="flex items-start sm:items-center gap-3">
+            <div class="p-2.5 rounded-2xl bg-amber-500/15 text-amber-400 border border-amber-500/30 shrink-0">
+              <i data-lucide="clapperboard" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <div class="flex flex-wrap items-center gap-2">
+                <h2 id="ui-search-heading" class="text-lg sm:text-xl font-extrabold text-white">
+                  பாடல் சிச்சுவேஷன் தேடல் (Scene Situation Song Finder)
+                </h2>
+                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                  தமிழ் • Tanglish • English
+                </span>
+              </div>
+              <p id="ui-search-subheading" class="text-xs sm:text-sm text-slate-300 mt-1">
+                இயக்குநர் கேட்கும் காட்சியின் சூழலை <strong>தமிழ், Tanglish அல்லது ஆங்கிலத்தில்</strong> டைப் செய்யவும் — நமது பாடல்களில் இருந்து பொருத்தமான பாடல்களை உடனே கீழே காட்டும்!
+              </p>
+            </div>
+          </div>
+
+          <button
+            id="btn-clear-search"
+            onclick="window.appActions.clearSearch()"
+            class="hidden text-xs px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 items-center gap-1.5"
+          >
+            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+            <span id="ui-btn-clear">தேடலை அழி (Clear)</span>
+          </button>
+        </div>
+
+        <!-- Search Form -->
+        <form onsubmit="window.appActions.handleSearchSubmit(event)" class="mt-4">
+          <div class="flex flex-col sm:flex-row gap-3">
+            <div class="relative flex-1">
+              <i data-lucide="search" class="w-5 h-5 text-amber-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+              <input
+                id="situation-search-input"
+                type="text"
+                oninput="window.appActions.handleLiveInput(this.value)"
+                placeholder="Type Scene Situation in தமிழ் / Tanglish / English... (உ-ம்: காதல் மழை, Kovil thiruvizha, Hero mass intro, Love failure)"
+                class="w-full pl-12 pr-4 py-4 rounded-2xl bg-slate-950/95 border border-slate-700 focus:border-amber-400 focus:outline-none text-sm sm:text-base text-white placeholder-slate-400 shadow-inner"
+              />
+            </div>
+            <button
+              type="submit"
+              id="btn-search-submit"
+              class="px-6 py-4 rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-extrabold text-sm sm:text-base flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 transition-all shrink-0"
+            >
+              <i data-lucide="sparkles" class="w-5 h-5"></i>
+              <span id="ui-btn-search">சிச்சுவேஷன் பாடலை தேடு</span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Quick Situation Chips (Tamil, Tanglish, English) -->
+        <div class="mt-4 flex flex-wrap items-center gap-2">
+          <span id="ui-quick-try-label" class="text-[11px] font-bold uppercase tracking-wider text-amber-400 mr-1">
+            உடனடி சிச்சுவேஷன் (Click to Test):
+          </span>
+          <div id="quick-chips-container" class="flex flex-wrap gap-2"></div>
+        </div>
+
+        <!-- ==========================================
+             MATCHED SITUATION RESULTS BOX (SHOWS RIGHT BELOW INPUT)
+        ========================================== -->
+        <div id="search-results-panel" class="hidden mt-6 pt-6 border-t border-slate-800/90">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <div class="flex items-center gap-2">
+              <i data-lucide="award" class="w-5 h-5 text-amber-400"></i>
+              <h3 id="search-results-title" class="text-sm sm:text-base font-extrabold text-amber-300">
+                பொருத்தமான சிச்சுவேஷன் பாடல்கள் (Matched Songs)
+              </h3>
+            </div>
+            <span id="search-results-summary" class="text-xs text-slate-300 bg-slate-800/90 px-3 py-1 rounded-lg border border-slate-700"></span>
+          </div>
+
+          <div id="search-results-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SECTION 3: FULL STUDIO CATALOG & CATEGORY TABS
+    ========================================== -->
+    <section>
+      <div class="flex flex-wrap items-center justify-between gap-4 mb-5">
+        
+        <!-- Filter Tabs -->
+        <div id="category-tabs-container" class="flex flex-wrap items-center gap-2"></div>
+
+        <!-- General Upload Button -->
+        <button
+          onclick="window.appActions.openUploadModal()"
+          class="admin-only-btn flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-extrabold text-xs sm:text-sm shadow-lg shadow-emerald-500/20 transition-all"
+        >
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          <span id="ui-btn-upload-main">புதிய AI பாடல் அப்லோட் (+ Upload Song)</span>
+        </button>
+
+      </div>
+
+      <!-- Songs Catalog Grid -->
+      <div id="catalog-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+    </section>
+
+  </main>
+
+  <!-- ==========================================
+       PERSISTENT BOTTOM AUDIO PLAYER BAR
+  ========================================== -->
+  <div id="bottom-player-bar" class="fixed bottom-0 left-0 right-0 z-40 hidden bg-slate-950/95 backdrop-blur-xl border-t border-amber-500/40 px-4 sm:px-8 py-3 shadow-2xl">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <button
+          onclick="window.appActions.toggleActivePlayer()"
+          class="w-11 h-11 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 flex items-center justify-center shadow-lg"
+        >
+          <i data-lucide="pause" class="w-5 h-5 fill-current"></i>
+        </button>
+        <div>
+          <div class="flex items-center gap-2">
+            <span id="player-song-title" class="text-sm font-extrabold text-white"></span>
+            <span id="player-song-genre" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30"></span>
+          </div>
+          <p id="player-song-situation" class="text-xs text-slate-400 line-clamp-1 max-w-md"></p>
+        </div>
+      </div>
+
+      <div class="flex-1 max-w-md hidden md:flex items-center gap-3">
+        <span id="player-mode-badge" class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-amber-500/15 text-amber-400 font-mono">STUDIO AUDIO</span>
+        <div class="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden">
+          <div id="player-progress-bar" class="h-full bg-gradient-to-r from-amber-400 to-cyan-400 transition-all duration-300" style="width: 15%"></div>
+        </div>
+        <span id="player-song-bpm" class="text-[11px] text-slate-400 font-mono"></span>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button
+          onclick="window.appActions.toggleMute()"
+          class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200"
+          title="Mute / Unmute"
+        >
+          <i id="player-volume-icon" data-lucide="volume-2" class="w-4 h-4 text-amber-400"></i>
+        </button>
+        <button
+          onclick="window.appActions.stopPlayback()"
+          class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-rose-500/20 hover:text-rose-300 text-xs font-bold text-slate-300 border border-slate-700"
+        >
+          <span id="ui-btn-stop">நிறுத்து (Stop)</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL 1: UPLOAD AI SONG TO CLOUD VAULT
+  ========================================== -->
+  <div id="upload-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl max-w-xl w-full p-6 sm:p-7 shadow-2xl my-8">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <div class="p-2.5 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            <i data-lucide="upload-cloud" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 id="ui-modal-upload-title" class="text-lg font-extrabold text-white">
+              புதிய AI பாடலை கிளவுடில் சேமி (Upload Song to Cloud)
+            </h3>
+            <p id="ui-modal-upload-sub" class="text-xs text-slate-400">
+              Mumbai Kumar Studio • Melody, Folk அல்லது Bhakti பிரிவில் சேமிக்கவும்
+            </p>
+          </div>
+        </div>
+        <button onclick="window.appActions.closeUploadModal()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <form onsubmit="window.appActions.submitUploadForm(event)" class="space-y-4 mt-5">
+        <!-- Category Selection -->
+        <div>
+          <label id="ui-label-cat" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">
+            1. பாடல் பிரிவைத் தேர்ந்தெடுக்கவும் (Select Genre Vault) *
+          </label>
+          <div class="grid grid-cols-3 gap-2.5">
+            <button type="button" id="upload-cat-Melody" onclick="window.appActions.setUploadGenre('Melody')" class="py-2.5 px-3 rounded-xl font-bold text-xs border transition-all">
+              Melody • மெலடி
+            </button>
+            <button type="button" id="upload-cat-Folk" onclick="window.appActions.setUploadGenre('Folk')" class="py-2.5 px-3 rounded-xl font-bold text-xs border transition-all">
+              Folk • நாட்டுப்புறம்
+            </button>
+            <button type="button" id="upload-cat-Bhakti" onclick="window.appActions.setUploadGenre('Bhakti')" class="py-2.5 px-3 rounded-xl font-bold text-xs border transition-all">
+              Bhakti • பக்தி
+            </button>
+          </div>
+        </div>
+
+        <!-- Song Title -->
+        <div>
+          <label id="ui-label-title" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+            2. பாடல் பெயர் (Song Title - தமிழ் / English) *
+          </label>
+          <input
+            id="upload-input-title"
+            type="text"
+            required
+            placeholder="உ-ம்: மழையே மழையே / Vennila Mazhaiye (AI Master)"
+            class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white focus:border-amber-400 focus:outline-none"
+          />
+        </div>
+
+        <!-- Audio File Upload -->
+        <div>
+          <label id="ui-label-audio" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">
+            3. ஆடியோ ஃபைல் (MP3 / WAV / OGG) அல்லது Studio Demo Synth
+          </label>
+          <label class="flex items-center justify-between px-4 py-3 rounded-xl bg-slate-950 border border-dashed border-slate-700 hover:border-amber-400 cursor-pointer transition-colors">
+            <div class="flex items-center gap-2.5 text-xs text-slate-300">
+              <i data-lucide="file-audio" class="w-5 h-5 text-amber-400 shrink-0"></i>
+              <span id="upload-file-name-label">MP3 / WAV ஆடியோ ஃபைலைத் தேர்ந்தெடுக்க கிளிக் செய்யவும்</span>
+            </div>
+            <span class="px-2.5 py-1 rounded-lg bg-slate-800 text-[11px] font-semibold text-amber-300 shrink-0">Browse Audio</span>
+            <input id="upload-input-file" type="file" accept="audio/*" onchange="window.appActions.handleFileSelect(event)" class="hidden" />
+          </label>
+        </div>
+
+        <!-- Scene Situation Description -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label id="ui-label-situation" class="text-xs font-bold uppercase tracking-wider text-slate-300">
+              4. பாடல் சிச்சுவேஷன் / காட்சி விவரம் (தமிழ், Tanglish, English) *
+            </label>
+            <button
+              type="button"
+              onclick="window.appActions.autoFillSituationTags()"
+              class="text-[11px] font-bold text-amber-400 hover:text-amber-300 flex items-center gap-1"
+            >
+              <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+              <span>AI Auto-Tag</span>
+            </button>
+          </div>
+          <textarea
+            id="upload-input-situation"
+            rows="3"
+            required
+            placeholder="எந்த மாதிரி காட்சிக்கு இந்த பாடல்? (உ-ம்: காதல் தோல்வி மழை காட்சி, Hero love failure rain scene, Kovil thiruvizha climax...)"
+            class="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white focus:border-amber-400 focus:outline-none"
+          ></textarea>
+        </div>
+
+        <!-- BPM & Raga -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-[11px] font-bold uppercase text-slate-400 mb-1">Tempo (BPM)</label>
+            <input id="upload-input-bpm" type="number" value="92" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white" />
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block text-[11px] font-bold uppercase text-slate-400 mb-1">Raga / Scale (ராகம்)</label>
+            <input id="upload-input-raga" type="text" placeholder="உ-ம்: ரீதிகௌளை / Reethigowla / C Minor" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white" />
+          </div>
+        </div>
+
+        <!-- Tags -->
+        <div>
+          <label class="block text-[11px] font-bold uppercase text-slate-400 mb-1">
+            தேடல் வார்த்தைகள் / Tags (Comma Separated - தமிழ், Tanglish, English)
+          </label>
+          <input id="upload-input-tags" type="text" placeholder="காதல், மழை, Love, Rain, Kadhal, Mazhai, Melody" class="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white" />
+        </div>
+
+        <div class="pt-3 flex items-center justify-end gap-3">
+          <button type="button" onclick="window.appActions.closeUploadModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300">
+            ரத்து (Cancel)
+          </button>
+          <button type="submit" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-slate-950 font-extrabold text-xs sm:text-sm flex items-center gap-2 shadow-lg">
+            <i data-lucide="cloud" class="w-4 h-4"></i>
+            <span id="ui-btn-save-cloud">கிளவுடில் சேமி (Save Song)</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL 2: AI PALLAVI LYRICS & HOOK GENERATOR
+  ========================================== -->
+  <div id="lyrics-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
+    <div class="bg-slate-900 border border-indigo-500/40 rounded-3xl max-w-xl w-full p-6 sm:p-7 shadow-2xl my-8">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <div class="p-2.5 rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
+            <i data-lucide="wand-2" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-extrabold text-white">Mumbai Kumar AI Lyrics & Hook Lab</h3>
+            <p class="text-xs text-slate-400">காட்சிக்கு ஏற்ற பல்லவி வரிகள் (தமிழ் & Tanglish) + இசை குறிப்புகள்</p>
+          </div>
+        </div>
+        <button onclick="window.appActions.closeLyricsModal()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <form onsubmit="window.appActions.generateHookLyrics(event)" class="space-y-4 mt-4">
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-300 mb-1.5">
+            காட்சியின் சூழலை உள்ளிடவும் (Enter Scene Situation in Tamil / Tanglish / English)
+          </label>
+          <input
+            id="lyrics-prompt-input"
+            type="text"
+            required
+            placeholder="உ-ம்: கோவில் திருவிழாவில் ஹீரோ ஹீரோயினை முதன்முறையாகப் பார்க்கும் காட்சி..."
+            class="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-700 text-sm text-white focus:border-indigo-400 focus:outline-none"
+          />
+        </div>
+        <button
+          type="submit"
+          id="btn-generate-lyrics"
+          class="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg"
+        >
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          <span>பல்லவி வரிகளை உருவாக்கு (Generate Pallavi Hook)</span>
+        </button>
+      </form>
+
+      <div id="lyrics-output-box" class="hidden mt-5 p-4 rounded-2xl bg-slate-950 border border-indigo-500/30 space-y-3">
+        <div>
+          <span class="text-[10px] font-bold uppercase text-indigo-400">பல்லவி (Tamil Script):</span>
+          <p id="lyrics-out-tamil" class="text-sm font-bold text-white mt-0.5 whitespace-pre-line"></p>
+        </div>
+        <div>
+          <span class="text-[10px] font-bold uppercase text-amber-400">Pallavi (Tanglish):</span>
+          <p id="lyrics-out-tanglish" class="text-sm text-amber-200 mt-0.5 whitespace-pre-line"></p>
+        </div>
+        <div class="pt-2 border-t border-slate-800 text-xs text-slate-300 space-y-1">
+          <p id="lyrics-out-music"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       MODAL 3: GITHUB PAGES DEPLOYMENT & DOWNLOAD
+  ========================================== -->
+  <div id="github-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto">
+    <div class="bg-slate-900 border border-emerald-500/40 rounded-3xl max-w-xl w-full p-6 sm:p-7 shadow-2xl my-8">
+      <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <div class="p-2.5 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+            <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-extrabold text-white">GitHub Pages Ready (index.html)</h3>
+            <p class="text-xs text-slate-400">Direct Browser & GitHub Commit Ready — No Build Step Needed!</p>
+          </div>
+        </div>
+        <button onclick="window.appActions.closeGithubHelpModal()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 mt-4 text-xs sm:text-sm text-slate-300 leading-relaxed">
+        <div class="p-3.5 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-200">
+          <strong>ஏன் முன்பு GitHub-ல் கோடு மட்டுமே தெரிந்தது?</strong><br/>
+          GitHub Pages-ல் `.jsx` (React) கோப்பை நேரடியாக போட்டால் பிரவுசரால் அதை ரன் செய்ய முடியாது. இப்போது இந்த <strong>`index.html`</strong> கோப்பு முழுமையான HTML/JS ஆக மாற்றப்பட்டுள்ளது!
+        </div>
+        <ol class="list-decimal list-inside space-y-2 text-slate-300">
+          <li>கீழே உள்ள <strong>"Download index.html"</strong> பட்டனை கிளிக் செய்து கோப்பை டவுன்லோட் செய்யவும்.</li>
+          <li>உங்கள் GitHub Repository-ல் பழைய கோப்பிற்கு பதிலாக இந்த <strong>`index.html`</strong> கோப்பை Upload / Commit செய்யவும்.</li>
+          <li>இப்போது உங்கள் GitHub Pages லிங்க் நேரடியாக அழகான <strong>Mumbai Kumar Studio</strong> வெப் ஆப்பாக வேலை செய்யும்!</li>
+        </ol>
+        <div class="pt-2 flex justify-end gap-3">
+          <button
+            onclick="window.appActions.downloadStandaloneHtml()"
+            class="px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs sm:text-sm flex items-center gap-2 shadow-lg"
+          >
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span>Download index.html for GitHub</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       APPLICATION LOGIC & MULTILINGUAL ENGINE
+  ========================================== -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, doc, setDoc, deleteDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // ==========================================
+    // 1. BILINGUAL UI TRANSLATION DICTIONARY (TAMIL & ENGLISH)
+    // ==========================================
+    const TRANSLATIONS = {
+      ta: {
+        langButton: "Language: தமிழ் (Switch to English)",
+        brandSubtitle: "மெலடி • நாட்டுப்புறம் • பக்தி கிளவுட் & சிச்சுவேஷன் தேடல்",
+        cloudReady: "கிளவுட் சேமிப்பு தயார்",
+        btnLyrics: "AI பாடல் வரிகள்",
+        btnShortlist: "தேர்ந்தெடுக்கப்பட்டவை",
+        btnPitchOff: "இயக்குநர் பிட்ச் மோட்",
+        btnPitchOn: "பிட்ச் மோட்: ஆன் (Pitch ON)",
+        sec1Heading: "1. பாடல் பிரிவுகள் & கிளவுட் அப்லோட் (Melody, Folk, Bhakti Cloud Vaults)",
+        showAllLink: "அனைத்து பாடல்களையும் காட்டு (Show All)",
+        tracksWord: "பாடல்கள்",
+        melodyBadge: "MELODY • மெலடி பாடல்கள்",
+        melodyTitle: "மெலடி பாடல்கள் (Melody)",
+        melodyDesc: "காதல், மழை இரவு, அம்மா சென்டிமென்ட், சோகம் & மென்மையான பாடல்கள்",
+        melodyHint: "மெலடி பாடல்களை பார்க்க →",
+        btnUploadMelody: "+ மெலடி அப்லோட்",
+        folkBadge: "FOLK • நாட்டுப்புற பாடல்கள்",
+        folkTitle: "நாட்டுப்புற / குத்து (Folk)",
+        folkDesc: "ஹீரோ மாஸ் ஓபனிங், கிராமத்து திருவிழா, உறுமி மேளம் & குத்து பாடல்கள்",
+        folkHint: "நாட்டுப்புற பாடல்களை பார்க்க →",
+        btnUploadFolk: "+ ஃபோக் அப்லோட்",
+        bhaktiBadge: "BHAKTI • பக்தி பாடல்கள்",
+        bhaktiTitle: "பக்தி பாடல்கள் (Bhakti)",
+        bhaktiDesc: "கோவில் திருவிழா கிளைமாக்ஸ், அம்மன் அருள், சுப்ரபாதம் & தெய்வீக பாடல்கள்",
+        bhaktiHint: "பக்தி பாடல்களை பார்க்க →",
+        btnUploadBhakti: "+ பக்தி அப்லோட்",
+        searchHeading: "பாடல் சிச்சுவேஷன் தேடல் (Scene Situation Song Finder)",
+        searchSubheading: "இயக்குநர் அல்லது தயாரிப்பாளர் கேட்கும் காட்சியின் சூழலை தமிழ், Tanglish அல்லது ஆங்கிலத்தில் டைப் செய்யவும் — நமது பாடல்களில் இருந்து பொருத்தமான பாடல்களை உடனே கீழே காட்டும்!",
+        searchPlaceholder: "காட்சி சூழலை டைப் செய்யவும் (தமிழ் / Tanglish / English)... உ-ம்: காதல் மழை, Kovil thiruvizha, Hero intro, Love failure",
+        btnSearch: "சிச்சுவேஷன் பாடலை தேடு",
+        btnClear: "தேடலை அழி (Clear)",
+        quickTryLabel: "உடனடி சிச்சுவேஷன் (Click to Test):",
+        matchedHeading: "சிச்சுவேஷனுக்குப் பொருத்தமான பாடல்கள் (Matched Songs from Studio)",
+        btnUploadMain: "+ புதிய AI பாடல் அப்லோட் (Upload Song)",
+        tabAll: "அனைத்து பாடல்கள் (All)",
+        tabMelody: "மெலடி (Melody)",
+        tabFolk: "நாட்டுப்புறம் (Folk)",
+        tabBhakti: "பக்தி (Bhakti)",
+        tabShortlist: "★ தேர்ந்தெடுக்கப்பட்டவை (Shortlist)",
+        sceneSituationLabel: "🎬 படத்தின் காட்சி சூழல் (Scene Situation):",
+        whyMatchPrefix: "இந்த காட்சிக்கு ஏன் பொருந்தும்:",
+        playForDirector: "பாடலை ப்ளே செய் (Play Song)",
+        playingNow: "பாடல் ஒலிக்கிறது... (Pause)",
+        statusApproved: "ஒப்புதல் (Approved)",
+        statusProgress: "தயாரிப்பில் (In Progress)",
+        statusRemix: "ரீமிக்ஸ் தேவை (Needs Remix)"
+      },
+      en: {
+        langButton: "Language: English (தமிழுக்கு மாற்ற)",
+        brandSubtitle: "Melody • Folk • Bhakti Cloud Vault & Scene Situation Matcher",
+        cloudReady: "Cloud Storage Ready",
+        btnLyrics: "AI Lyrics / Hook Lab",
+        btnShortlist: "Director Shortlist",
+        btnPitchOff: "Director Pitch View",
+        btnPitchOn: "Pitch Mode: ON",
+        sec1Heading: "1. Category Cloud Vaults (Select Genre or Upload Directly)",
+        showAllLink: "Show All Studio Songs",
+        tracksWord: "Tracks",
+        melodyBadge: "MELODY SONGS",
+        melodyTitle: "Melody Cloud Vault",
+        melodyDesc: "Romantic Rain, First Sight Love, Mother Sentiment & Heartbreak Melodies",
+        melodyHint: "Click to view Melody Songs →",
+        btnUploadMelody: "+ Upload Melody",
+        folkBadge: "FOLK & KUTHU SONGS",
+        folkTitle: "Folk & Kuthu Vault",
+        folkDesc: "Hero Mass Intro, Urumi Melam, Village Festival & Rural Folk Songs",
+        folkHint: "Click to view Folk Songs →",
+        btnUploadFolk: "+ Upload Folk",
+        bhaktiBadge: "BHAKTI & DIVINE SONGS",
+        bhaktiTitle: "Bhakti Cloud Vault",
+        bhaktiDesc: "Temple Festival Climax, Fierce Amman Invocation & Morning Devotion",
+        bhaktiHint: "Click to view Bhakti Songs →",
+        btnUploadBhakti: "+ Upload Bhakti",
+        searchHeading: "Director's Scene Situation Finder (AI Song Matcher)",
+        searchSubheading: "Type any movie scene situation in Tamil (தமிழ்), Tanglish, or English — instantly finds and plays matching tracks from Mumbai Kumar Studio!",
+        searchPlaceholder: "Type Scene Situation in Tamil, Tanglish, or English... e.g., காதல் மழை, Kovil thiruvizha, Hero mass intro",
+        btnSearch: "Find Situation Songs",
+        btnClear: "Clear Search",
+        quickTryLabel: "Try Sample Situations:",
+        matchedHeading: "Situation Matched Songs from Mumbai Kumar Studio",
+        btnUploadMain: "+ Upload New AI Song to Cloud",
+        tabAll: "All Studio Songs",
+        tabMelody: "Melody Songs",
+        tabFolk: "Folk Songs",
+        tabBhakti: "Bhakti Songs",
+        tabShortlist: "★ Director Shortlist",
+        sceneSituationLabel: "🎬 Movie Scene Situation:",
+        whyMatchPrefix: "Why it fits this scene:",
+        playForDirector: "Play Song for Director",
+        playingNow: "Playing Studio Track (Pause)",
+        statusApproved: "Approved",
+        statusProgress: "In Progress",
+        statusRemix: "Needs Remix"
+      }
+    };
+
+    // Quick Situation Test Chips in Tamil, Tanglish, and English
+    const QUICK_CHIPS = [
+      { labelTa: "🌧️ காதல் மழை இரவு (Rain Romance)", labelEn: "🌧️ Rainy Night Love (காதல் மழை)", query: "காதல் மழை இரவு Hero heroine rainy night romantic love melody kadhal" },
+      { labelTa: "💔 காதல் தோல்வி (Love Failure)", labelEn: "💔 Heartbreak / Love Failure (காதல் தோல்வி)", query: "காதல் தோல்வி சோகம் Love failure heartbreak sad breakup alone sogam" },
+      { labelTa: "🥁 ஹீரோ மாஸ் ஓபனிங் குத்து (Hero Intro)", labelEn: "🥁 Hero Mass Intro Kuthu (கிராமத்து குத்து)", query: "ஹீரோ மாஸ் ஓபனிங் கிராமத்து குத்து Hero mass intro village festival kuthu dance urumi" },
+      { labelTa: "🔥 கோவில் திருவிழா கிளைமாக்ஸ் (Bhakti)", labelEn: "🔥 Kovil Thiruvizha Climax (கோவில் திருவிழா)", query: "கோவில் திருவிழா அம்மன் பக்தி கிளைமாக்ஸ் Kovil thiruvizha temple festival Amman climax" },
+      { labelTa: "👩‍👦 அம்மா பாசம் சென்டிமென்ட் (Amma)", labelEn: "👩‍👦 Mother Sentiment (அம்மா பாசம்)", query: "அம்மா பாசம் தாய் சென்டிமென்ட் Mother sentiment amma pasam family emotional" },
+      { labelTa: "🌾 கிராமத்து தென்றல் & விவசாயம் (Rural Folk)", labelEn: "🌾 Village Rural Montage (கிராமத்து பாடல்)", query: "கிராமத்து வயல் விவசாயம் மண் வாசனை Village rural farming folk nature" },
+      { labelTa: "🌅 காலை கோவில் சுப்ரபாதம் (Divine Morning)", labelEn: "🌅 Peaceful Temple Morning (தெய்வீக காலை)", query: "காலை கோவில் அமைதி திருமணம் Peaceful morning temple prayer divine wedding" }
+    ];
+
+    // ==========================================
+    // 2. PRE-LOADED MUMBAI KUMAR STUDIO CATALOG
+    //    (Rich Tamil, Tanglish & English metadata)
+    // ==========================================
+    const INITIAL_SONGS = [
+      {
+        id: "mk-melody-1",
+        title: "மழையே மழையே - Mazhaiye Mazhaiye (AI Vocal)",
+        genre: "Melody",
+        situationTa: "ஹீரோ ஹீரோயின் மழை இரவு காபி ஷாப் முதல் சந்திப்பு, மென்மையான காதல் பார்வை (Rainy night coffee shop romantic melody, kadhal mazhai scene)",
+        situationEn: "Hero & Heroine rainy night coffee shop romance, first eye contact, soft emotional love breeze (காதல் மழை இரவு காட்சி)",
+        tags: ["காதல்", "மழை", "மெலடி", "இரவு", "Rain", "Romance", "Love", "Kadhal", "Mazhai", "Coffee Shop", "Night", "Soft"],
+        bpm: 84,
+        raga: "Reethigowla / ரீதிகௌளை (C Minor)",
+        duration: "3:42",
+        status: "Approved",
+        shortlisted: true,
+        directorNotes: "Flute interlude at 1:15 works great for slow-motion rain visual.",
+        synthPreset: "melody_rain",
+        createdAt: Date.now() - 600000
+      },
+      {
+        id: "mk-melody-2",
+        title: "தனிமையில் ஒரு பயணம் - Thanimaiyil Oru Payanam",
+        genre: "Melody",
+        situationTa: "காதல் தோல்வி சோக காட்சி, நள்ளிரவு கடற்கரை சாலையில் ஹீரோ தனியாக நடந்து செல்லும் காட்சி (Heartbreak love failure scene, sogam breakup)",
+        situationEn: "Heartbreak love failure scene, hero walking alone on beach road at midnight, emotional breakup (காதல் தோல்வி சோக பாடல்)",
+        tags: ["காதல் தோல்வி", "சோகம்", "தனிமை", "பிரிவு", "Love Failure", "Heartbreak", "Breakup", "Sad", "Sogam", "Alone", "Thanimai"],
+        bpm: 76,
+        raga: "Charukesi / சாருகேசி (D Minor)",
+        duration: "4:10",
+        status: "Approved",
+        shortlisted: false,
+        directorNotes: "Heavy solo violin & acoustic guitar backing.",
+        synthPreset: "melody_sad",
+        createdAt: Date.now() - 500000
+      },
+      {
+        id: "mk-melody-3",
+        title: "ஆராரோ என் தாயே - Aararo En Thaaye",
+        genre: "Melody",
+        situationTa: "அம்மா பாசம் மற்றும் குடும்ப சென்டிமென்ட் காட்சி, தாய் மடியில் அழும் எமோஷனல் காட்சி (Mother sentiment amma pasam emotional scene)",
+        situationEn: "Mother sentiment emotional scene, amma pasam, family reunion flashback, tears of affection (அம்மா பாசம் சென்டிமென்ட்)",
+        tags: ["அம்மா", "தாய்", "பாசம்", "சென்டிமென்ட்", "குடும்பம்", "Mother", "Amma", "Pasam", "Sentiment", "Family", "Emotional"],
+        bpm: 72,
+        raga: "Neelambari / நீலாம்பரி (F Major)",
+        duration: "3:55",
+        status: "In Progress",
+        shortlisted: true,
+        directorNotes: "Warm shehnai and lullaby humming chorus.",
+        synthPreset: "melody_mother",
+        createdAt: Date.now() - 400000
+      },
+      {
+        id: "mk-folk-1",
+        title: "மதுரை வீரன் வாராரு - Madurai Veeran Varaaru",
+        genre: "Folk",
+        situationTa: "ஹீரோ மாஸ் ஓபனிங் அறிமுகக் காட்சி, ஊர் திருவிழா கொண்டாட்டம், தாரை தப்பட்டை உறுமி மேளம் குத்து டான்ஸ் (Hero mass intro village kuthu)",
+        situationEn: "Hero mass introduction scene in village market, festival celebration, high energy kuthu dance & urumi melam (ஹீரோ ஓபனிங் குத்து பாடல்)",
+        tags: ["ஹீரோ ஓபனிங்", "குத்து", "மாஸ்", "திருவிழா", "உறுமி", "நாட்டுப்புறம்", "Hero Intro", "Mass", "Kuthu", "Village", "Ooru", "Dance", "Urumi"],
+        bpm: 128,
+        raga: "Folk Pentatonic / நாட்டுப்புற தாளம் (G Minor)",
+        duration: "3:28",
+        status: "Approved",
+        shortlisted: true,
+        directorNotes: "High energy brass + parai beat drop for hero entry title card.",
+        synthPreset: "folk_kuthu",
+        createdAt: Date.now() - 350000
+      },
+      {
+        id: "mk-folk-2",
+        title: "கரிசக்காட்டு குயிலே - Karisakkattu Kuyile",
+        genre: "Folk",
+        situationTa: "கிராமத்து பசுமையான வயல்வெளி, விவசாயம், மாட்டுவண்டி பயணம் மற்றும் கிராமத்து காதல் (Village farming montage, gramathu song)",
+        situationEn: "Village farming montage, green fields, innocent rural love teasing, bullock cart ride (கிராமத்து மண் வாசனை பாடல்)",
+        tags: ["கிராமம்", "வயல்", "விவசாயம்", "மண் வாசனை", "நாட்டுப்புறம்", "Village", "Rural", "Gramam", "Farming", "Folk Melody", "Nature"],
+        bpm: 102,
+        raga: "Harikambhoji / ஹரிகாம்போதி (A Major)",
+        duration: "3:50",
+        status: "Approved",
+        shortlisted: false,
+        directorNotes: "Authentic nadaswaram and thavil groove.",
+        synthPreset: "folk_rural",
+        createdAt: Date.now() - 300000
+      },
+      {
+        id: "mk-bhakti-1",
+        title: "ஓம்கார காளியம்மா - Omkara Kaliyamma (Climax)",
+        genre: "Bhakti",
+        situationTa: "கோவில் திருவிழா கிளைமாக்ஸ் சண்டை காட்சி, அம்மன் அருள், தீமிதி திருவிழா, உடுக்கை ஒலி (Kovil thiruvizha climax fight, fierce Amman bhakti)",
+        situationEn: "Temple festival climax fight, fierce Goddess Amman invocation, fire walk, udukkai & goosebumps devotion (கோவில் திருவிழா கிளைமாக்ஸ் பக்தி)",
+        tags: ["கோவில்", "திருவிழா", "பக்தி", "அம்மன்", "கிளைமாக்ஸ்", "சாமி", "Kovil", "Thiruvizha", "Temple", "Climax", "Amman", "Bhakti", "Goosebumps", "God"],
+        bpm: 136,
+        raga: "Simhendramadhyamam / சிம்மேந்திரமத்யமம் (E Minor)",
+        duration: "4:25",
+        status: "Approved",
+        shortlisted: true,
+        directorNotes: "Massive temple bells, udukkai, and sanskrit chorus chant.",
+        synthPreset: "bhakti_climax",
+        createdAt: Date.now() - 250000
+      },
+      {
+        id: "mk-bhakti-2",
+        title: "சுப்ரபாத மங்களம் - Suprabhatha Mangalam",
+        genre: "Bhakti",
+        situationTa: "அதிகாலை கோவில் நடை திறக்கும் அமைதியான தெய்வீக காட்சி, குத்துவிளக்கு ஏற்றுதல், சுப முகூர்த்த திருமணம் (Peaceful morning temple prayer & wedding)",
+        situationEn: "Peaceful morning temple opening scene, lamp lighting, divine blessing, auspicious wedding muhurtham (தெய்வீக காலை & கல்யாண காட்சி)",
+        tags: ["காலை", "கோவில்", "அமைதி", "திருமணம்", "கல்யாணம்", "பக்தி", "Morning", "Peaceful", "Divine", "Temple", "Wedding", "Kalyanam", "Prayer"],
+        bpm: 80,
+        raga: "Hamsadhwani / ஹம்சத்வனி (C Major)",
+        duration: "3:15",
+        status: "Needs Remix",
+        shortlisted: false,
+        directorNotes: "Veena and temple ghanta bells blend smoothly.",
+        synthPreset: "bhakti_peace",
+        createdAt: Date.now() - 200000
+      }
+    ];
+
+    // ==========================================
+    // 3. MULTILINGUAL SEMANTIC CONCEPT CLUSTERS
+    //    (Maps Tamil, Tanglish & English words to shared concepts)
+    // ==========================================
+    const MULTILINGUAL_CONCEPT_CLUSTERS = [
+      {
+        concept: "rain_romance",
+        keywords: [
+          "மழை", "காதல்", "இரவு", "ரொமான்ஸ்", "மெலடி", "காபி", "பார்வை", "தென்றல்",
+          "mazhai", "kadhal", "kaadhal", "love", "romance", "romantic", "rain", "rainy",
+          "monsoon", "drizzle", "coffee", "night", "breeze", "first sight", "couple", "melody"
+        ]
+      },
+      {
+        concept: "heartbreak_sad",
+        keywords: [
+          "காதல் தோல்வி", "தோல்வி", "சோகம்", "பிரிவு", "தனிமை", "வலி", "அழுகை", "கண்ணீர்",
+          "love failure", "heartbreak", "breakup", "sad", "sogam", "thanimai", "alone",
+          "lonely", "pain", "cry", "emotional", "beach road", "midnight", "soup song"
+        ]
+      },
+      {
+        concept: "mother_family",
+        keywords: [
+          "அம்மா", "தாய்", "பாசம்", "சென்டிமென்ட்", "குடும்பம்", "தாலாட்டு", "ஆராரோ", "தங்கை", "அப்பா",
+          "amma", "thaai", "pasam", "paasam", "mother", "mom", "sentiment", "family",
+          "lullaby", "aararo", "affection", "flashback", "reunion"
+        ]
+      },
+      {
+        concept: "hero_mass_kuthu",
+        keywords: [
+          "ஹீரோ", "மாஸ்", "ஓபனிங்", "குத்து", "டான்ஸ்", "ஆட்டம்", "உறுமி", "தப்பட்டை", "பறை", "மதுரை", "கொண்டாட்டம்",
+          "hero", "mass", "intro", "introduction", "opening", "entry", "kuthu", "dance",
+          "celebration", "party", "urumi", "thappattai", "parai", "local", "beat", "energetic"
+        ]
+      },
+      {
+        concept: "village_rural_folk",
+        keywords: [
+          "கிராமம்", "கிராமத்து", "ஊர்", "வயல்", "விவசாயம்", "மண்", "நாட்டுப்புற", "நாட்டுப்புறம்", "குயில்", "மாட்டுவண்டி",
+          "village", "rural", "gramam", "gramathu", "ooru", "folk", "farming", "vivasayam",
+          "fields", "nature", "green", "karisakkattu", "nadaswaram", "thavil"
+        ]
+      },
+      {
+        concept: "bhakti_climax_temple",
+        keywords: [
+          "கோவில்", "திருவிழா", "பக்தி", "அம்மன்", "காளி", "சாமி", "கடவுள்", "கிளைமாக்ஸ்", "சண்டை", "தீமிதி", "உடுக்கை", "அருள்",
+          "kovil", "koil", "thiruvizha", "festival", "temple", "bhakti", "bakthi", "amman",
+          "kali", "goddess", "god", "swamy", "saami", "climax", "fight", "goosebumps", "fierce", "udukkai", "devotional"
+        ]
+      },
+      {
+        concept: "bhakti_morning_peace",
+        keywords: [
+          "காலை", "சுப்ரபாதம்", "அமைதி", "திருமணம்", "கல்யாணம்", "முகூர்த்தம்", "விளக்கு", "பூஜை", "மங்களம்", "தெய்வீக",
+          "morning", "suprabhatham", "peace", "peaceful", "calm", "divine", "prayer",
+          "pooja", "wedding", "marriage", "kalyanam", "muhurtham", "auspicious", "blessing"
+        ]
+      }
+    ];
+
+    // ==========================================
+    // 4. WEB AUDIO STUDIO SYNTHESIZER
+    // ==========================================
+    class StudioSynthEngine {
+      constructor() {
+        this.ctx = null;
+        this.isPlaying = false;
+        this.intervalId = null;
+        this.volume = 0.75;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioCtx();
+        }
+        if (this.ctx.state === "suspended") {
+          this.ctx.resume();
+        }
+      }
+
+      setVolume(val) {
+        this.volume = val;
+      }
+
+      stop() {
+        this.isPlaying = false;
+        if (this.intervalId) {
+          clearInterval(this.intervalId);
+          this.intervalId = null;
+        }
+      }
+
+      playPreset(preset = "melody_rain", bpm = 90) {
+        this.stop();
+        this.init();
+        this.isPlaying = true;
+
+        const stepMs = (60 / (bpm || 90)) * 500;
+        let step = 0;
+
+        const scales = {
+          melody_rain: [261.63, 293.66, 311.13, 349.23, 392.00, 466.16, 523.25],
+          melody_sad: [293.66, 329.63, 349.23, 392.00, 440.00, 466.16, 587.33],
+          melody_mother: [349.23, 392.00, 440.00, 466.16, 523.25, 587.33, 698.46],
+          folk_kuthu: [196.00, 233.08, 261.63, 293.66, 349.23, 392.00],
+          folk_rural: [220.00, 246.94, 277.18, 329.63, 369.99, 440.00],
+          bhakti_climax: [164.81, 196.00, 233.08, 246.94, 311.13, 329.63],
+          bhakti_peace: [261.63, 293.66, 329.63, 392.00, 493.88, 523.25]
+        };
+
+        const activeScale = scales[preset] || scales.melody_rain;
+        const isFolk = preset.startsWith("folk");
+        const isBhakti = preset.startsWith("bhakti");
+
+        const triggerStep = () => {
+          if (!this.isPlaying || !this.ctx) return;
+          const now = this.ctx.currentTime;
+
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+
+          osc.type = isFolk ? (step % 2 === 0 ? "sawtooth" : "square") : isBhakti ? "triangle" : "sine";
+          const freq = activeScale[(step * 2 + (step % 3)) % activeScale.length];
+          osc.frequency.setValueAtTime(freq, now);
+
+          const peak = (isFolk ? 0.12 : 0.18) * this.volume;
+          gain.gain.setValueAtTime(0.001, now);
+          gain.gain.linearRampToValueAtTime(peak, now + 0.04);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + (stepMs / 1000) * 0.92);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + stepMs / 1000);
+
+          if (step % 2 === 0) {
+            const sub = this.ctx.createOscillator();
+            const subGain = this.ctx.createGain();
+            if (isFolk || preset === "bhakti_climax") {
+              sub.type = "triangle";
+              sub.frequency.setValueAtTime(145, now);
+              sub.frequency.exponentialRampToValueAtTime(42, now + 0.15);
+              subGain.gain.setValueAtTime(0.28 * this.volume, now);
+              subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+              sub.connect(subGain);
+              subGain.connect(this.ctx.destination);
+              sub.start(now);
+              sub.stop(now + 0.2);
+            } else if (isBhakti && step % 4 === 0) {
+              sub.type = "sine";
+              sub.frequency.setValueAtTime(1046.5, now);
+              subGain.gain.setValueAtTime(0.11 * this.volume, now);
+              subGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.75);
+              sub.connect(subGain);
+              subGain.connect(this.ctx.destination);
+              sub.start(now);
+              sub.stop(now + 0.8);
+            }
+          }
+          step++;
+        };
+
+        triggerStep();
+        this.intervalId = setInterval(triggerStep, stepMs);
+      }
+    }
+
+    const synthEngine = new StudioSynthEngine();
+
+    // ==========================================
+    // 5. APPLICATION STATE
+    // ==========================================
+    const state = {
+      lang: "ta", // 'ta' (Tamil + English bilingual) or 'en' (English)
+      songs: [...INITIAL_SONGS],
+      activeCategory: "All",
+      pitchMode: false,
+      playingSongId: null,
+      isMuted: false,
+      playbackProgress: 15,
+      uploadGenre: "Melody",
+      pendingAudioBlobUrl: "",
+      pendingAudioFileName: "",
+      localAudioBlobs: {}, // { songId: blobUrl }
+      lastSearchQuery: "",
+      matchedResults: null, // Array of { songId, matchScore, reasonTa, reasonEn }
+      user: null,
+      db: null,
+      appId: typeof __app_id !== "undefined" ? __app_id : "mumbai-kumar-studio"
+    };
+
+    let progressTimer = null;
+
+    // ==========================================
+    // 6. FIREBASE CLOUD INITIALIZATION (OPTIONAL + FALLBACK)
+    // ==========================================
+    async function initCloudStorage() {
+      try {
+        if (typeof __firebase_config !== "undefined" && __firebase_config) {
+          const config = JSON.parse(__firebase_config);
+          if (Object.keys(config).length > 0) {
+            const fbApp = initializeApp(config);
+            const auth = getAuth(fbApp);
+            const db = getFirestore(fbApp);
+            state.db = db;
+
+            if (typeof __initial_auth_token !== "undefined" && __initial_auth_token) {
+              await signInWithCustomToken(auth, __initial_auth_token);
+            } else {
+              await signInAnonymously(auth);
+            }
+
+            onAuthStateChanged(auth, (u) => {
+              state.user = u;
+              if (u) {
+                const colRef = collection(db, "artifacts", state.appId, "public", "data", "studio_songs_v2");
+                onSnapshot(colRef, async (snap) => {
+                  if (snap.empty) {
+                    for (const item of INITIAL_SONGS) {
+                      const dRef = doc(db, "artifacts", state.appId, "public", "data", "studio_songs_v2", item.id);
+                      await setDoc(dRef, item);
+                    }
+                  } else {
+                    const loaded = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                    loaded.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                    state.songs = loaded;
+                    renderAll();
+                  }
+                }, () => {});
+              }
+            });
+          }
+        }
+      } catch (e) {
+        console.warn("Running in standalone mode:", e);
+      }
+    }
+
+    // ==========================================
+    // 7. MULTILINGUAL SITUATION MATCHING ENGINE
+    //    (Works with Tamil script, Tanglish, and English!)
+    // ==========================================
+    function matchSongsForSituation(rawQuery) {
+      const q = (rawQuery || "").toLowerCase().trim();
+      if (!q) return [];
+
+      // Identify which concept clusters are triggered by the user's Tamil/Tanglish/English query
+      const activeClusters = [];
+      MULTILINGUAL_CONCEPT_CLUSTERS.forEach(cluster => {
+        const hit = cluster.keywords.some(kw => q.includes(kw.toLowerCase()));
+        if (hit) activeClusters.push(cluster);
+      });
+
+      // Expand query tokens with all synonyms from matched clusters
+      const queryWords = q.split(/[\s,.;!?]+/).filter(w => w.length >= 2);
+      const expandedKeywords = new Set(queryWords);
+      activeClusters.forEach(c => {
+        c.keywords.forEach(kw => expandedKeywords.add(kw.toLowerCase()));
+      });
+
+      const results = state.songs.map(song => {
+        const songCorpus = `${song.title} ${song.genre} ${song.situationTa || ""} ${song.situationEn || ""} ${(song.tags || []).join(" ")} ${song.raga || ""}`.toLowerCase();
+        let score = 0;
+        const matchedTerms = [];
+
+        // Direct query word matches
+        queryWords.forEach(word => {
+          if (songCorpus.includes(word)) {
+            score += 26;
+            matchedTerms.push(word);
+          }
+        });
+
+        // Semantic cluster synonym matches
+        expandedKeywords.forEach(syn => {
+          if (songCorpus.includes(syn)) {
+            score += 9;
+          }
+        });
+
+        // Genre boost if query mentions melody/folk/bhakti in Tamil or English
+        if ((q.includes("மெலடி") || q.includes("melody") || q.includes("காதல்") || q.includes("love")) && song.genre === "Melody") {
+          score += 22;
+        }
+        if ((q.includes("நாட்டுப்புற") || q.includes("குத்து") || q.includes("folk") || q.includes("kuthu") || q.includes("village") || q.includes("கிராம")) && song.genre === "Folk") {
+          score += 22;
+        }
+        if ((q.includes("பக்தி") || q.includes("கோவில்") || q.includes("அம்மன்") || q.includes("திருவிழா") || q.includes("bhakti") || q.includes("kovil") || q.includes("temple") || q.includes("god")) && song.genre === "Bhakti") {
+          score += 22;
+        }
+
+        const finalScore = Math.min(99, score);
+        const sitTa = song.situationTa || song.situationEn || "";
+        const sitEn = song.situationEn || song.situationTa || "";
+
+        return {
+          songId: song.id,
+          matchScore: finalScore,
+          reasonTa: `காட்சிப் பொருத்தம் (${song.genre}): "${sitTa}"`,
+          reasonEn: `Matches scene mood (${song.genre}): "${sitEn}"`
+        };
+      }).filter(r => r.matchScore > 0);
+
+      results.sort((a, b) => b.matchScore - a.matchScore);
+      return results;
+    }
+
+    // Optional Gemini AI enhancement on top of instant multilingual match
+    async function enhanceSearchWithGemini(queryText) {
+      try {
+        const apiKey = "";
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+        const catalogBrief = state.songs.map(s => ({
+          id: s.id,
+          title: s.title,
+          genre: s.genre,
+          situationTa: s.situationTa,
+          situationEn: s.situationEn,
+          tags: s.tags
+        }));
+
+        const payload = {
+          contents: [{
+            role: "user",
+            parts: [{
+              text: `You are the AI Assistant at "Mumbai Kumar Studio". A movie director searched for this scene situation (in Tamil, Tanglish, or English): "${queryText}".
+Match the best songs from this catalog: ${JSON.stringify(catalogBrief)}.
+Return JSON with recommendations ranked by matchScore (65-99), including both a Tamil explanation (reasonTa) and an English explanation (reasonEn).`
+            }]
+          }],
+          generationConfig: {
+            responseMimeType: "application/json",
+            responseSchema: {
+              type: "OBJECT",
+              properties: {
+                recommendations: {
+                  type: "ARRAY",
+                  items: {
+                    type: "OBJECT",
+                    properties: {
+                      songId: { type: "STRING" },
+                      matchScore: { type: "NUMBER" },
+                      reasonTa: { type: "STRING" },
+                      reasonEn: { type: "STRING" }
+                    },
+                    propertyOrdering: ["songId", "matchScore", "reasonTa", "reasonEn"]
+                  }
+                }
+              },
+              propertyOrdering: ["recommendations"]
+            }
+          }
+        };
+
+        const res = await fetch(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        const parsed = JSON.parse(data.candidates[0].content.parts[0].text);
+        if (parsed.recommendations && parsed.recommendations.length > 0) {
+          state.matchedResults = parsed.recommendations;
+          renderSearchResults();
+        }
+      } catch (e) {
+        // Local multilingual engine already rendered instant results
+      }
+    }
+
+    // ==========================================
+    // 8. UI RENDER FUNCTIONS
+    // ==========================================
+    function showToast(msg) {
+      const box = document.getElementById("toast-container");
+      const txt = document.getElementById("toast-text");
+      if (!box || !txt) return;
+      txt.textContent = msg;
+      box.classList.remove("hidden");
+      box.classList.add("flex");
+      setTimeout(() => {
+        box.classList.add("hidden");
+        box.classList.remove("flex");
+      }, 3600);
+    }
+
+    function setText(id, val) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = val;
+    }
+
+    function renderStaticTranslations() {
+      const t = TRANSLATIONS[state.lang];
+      setText("lang-toggle-label", t.langButton);
+      setText("ui-brand-subtitle", t.brandSubtitle);
+      setText("cloud-status-label", t.cloudReady);
+      setText("ui-btn-lyrics", t.btnLyrics);
+      setText("ui-btn-shortlist", t.btnShortlist);
+      setText("ui-btn-pitch", state.pitchMode ? t.btnPitchOn : t.btnPitchOff);
+      setText("ui-sec1-heading", t.sec1Heading);
+      setText("ui-show-all-link", t.showAllLink);
+      setText("ui-tracks-label-1", t.tracksWord);
+      setText("ui-tracks-label-2", t.tracksWord);
+      setText("ui-tracks-label-3", t.tracksWord);
+
+      setText("ui-melody-badge", t.melodyBadge);
+      setText("ui-melody-title", t.melodyTitle);
+      setText("ui-melody-desc", t.melodyDesc);
+      setText("ui-melody-filter-hint", t.melodyHint);
+      setText("ui-btn-upload-melody", t.btnUploadMelody);
+
+      setText("ui-folk-badge", t.folkBadge);
+      setText("ui-folk-title", t.folkTitle);
+      setText("ui-folk-desc", t.folkDesc);
+      setText("ui-folk-filter-hint", t.folkHint);
+      setText("ui-btn-upload-folk", t.btnUploadFolk);
+
+      setText("ui-bhakti-badge", t.bhaktiBadge);
+      setText("ui-bhakti-title", t.bhaktiTitle);
+      setText("ui-bhakti-desc", t.bhaktiDesc);
+      setText("ui-bhakti-filter-hint", t.bhaktiHint);
+      setText("ui-btn-upload-bhakti", t.btnUploadBhakti);
+
+      setText("ui-search-heading", t.searchHeading);
+      setText("ui-search-subheading", t.searchSubheading);
+      const searchInput = document.getElementById("situation-search-input");
+      if (searchInput) searchInput.placeholder = t.searchPlaceholder;
+      setText("ui-btn-search", t.btnSearch);
+      setText("ui-btn-clear", t.btnClear);
+      setText("ui-quick-try-label", t.quickTryLabel);
+      setText("ui-btn-upload-main", t.btnUploadMain);
+
+      // Pitch mode visibility for admin buttons
+      document.querySelectorAll(".admin-only-btn").forEach(btn => {
+        if (state.pitchMode) {
+          btn.classList.add("hidden");
+        } else {
+          btn.classList.remove("hidden");
+        }
+      });
+    }
+
+    function renderQuickChips() {
+      const container = document.getElementById("quick-chips-container");
+      if (!container) return;
+      container.innerHTML = QUICK_CHIPS.map((chip, idx) => {
+        const label = state.lang === "ta" ? chip.labelTa : chip.labelEn;
+        return `
+          <button
+            type="button"
+            onclick="window.appActions.runQuickChip(${idx})"
+            class="text-xs px-3 py-1.5 rounded-full bg-slate-800/90 hover:bg-amber-500/20 hover:text-amber-300 hover:border-amber-500/40 text-slate-200 border border-slate-700 transition-all"
+          >
+            ${label}
+          </button>
+        `;
+      }).join("");
+    }
+
+    function renderCountsAndTabs() {
+      const t = TRANSLATIONS[state.lang];
+      const counts = {
+        All: state.songs.length,
+        Melody: state.songs.filter(s => s.genre === "Melody").length,
+        Folk: state.songs.filter(s => s.genre === "Folk").length,
+        Bhakti: state.songs.filter(s => s.genre === "Bhakti").length,
+        Shortlist: state.songs.filter(s => s.shortlisted).length
+      };
+
+      setText("count-card-Melody", counts.Melody);
+      setText("count-card-Folk", counts.Folk);
+      setText("count-card-Bhakti", counts.Bhakti);
+      setText("count-shortlist-header", counts.Shortlist);
+
+      const showAllBtn = document.getElementById("btn-show-all-top");
+      if (showAllBtn) {
+        if (state.activeCategory !== "All") {
+          showAllBtn.classList.remove("hidden");
+          showAllBtn.classList.add("inline-flex");
+        } else {
+          showAllBtn.classList.add("hidden");
+          showAllBtn.classList.remove("inline-flex");
+        }
+      }
+
+      // Highlight active vault card
+      ["Melody", "Folk", "Bhakti"].forEach(g => {
+        const card = document.getElementById(`vault-card-${g}`);
+        if (!card) return;
+        if (state.activeCategory === g) {
+          card.className = "cursor-pointer group relative overflow-hidden rounded-2xl p-5 border-2 border-amber-400 bg-slate-900 shadow-xl shadow-amber-500/10 transition-all";
+        } else {
+          card.className = "cursor-pointer group relative overflow-hidden rounded-2xl p-5 border border-slate-800 bg-slate-900/70 hover:bg-slate-900 hover:border-slate-700 transition-all";
+        }
+      });
+
+      const tabs = [
+        { id: "All", label: t.tabAll, count: counts.All },
+        { id: "Melody", label: t.tabMelody, count: counts.Melody },
+        { id: "Folk", label: t.tabFolk, count: counts.Folk },
+        { id: "Bhakti", label: t.tabBhakti, count: counts.Bhakti },
+        { id: "Shortlist", label: t.tabShortlist, count: counts.Shortlist }
+      ];
+
+      const tabContainer = document.getElementById("category-tabs-container");
+      if (tabContainer) {
+        tabContainer.innerHTML = tabs.map(tab => {
+          const active = state.activeCategory === tab.id;
+          return `
+            <button
+              onclick="window.appActions.setCategory('${tab.id}')"
+              class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 border ${
+                active
+                  ? "bg-amber-500 text-slate-950 border-amber-400 shadow-lg shadow-amber-500/20"
+                  : "bg-slate-900 hover:bg-slate-800 text-slate-300 border-slate-800"
+              }"
+            >
+              <span>${tab.label}</span>
+              <span class="px-2 py-0.5 rounded-full text-[11px] ${
+                active ? "bg-slate-950/20 text-slate-950" : "bg-slate-800 text-slate-400"
+              }">${tab.count}</span>
+            </button>
+          `;
+        }).join("");
+      }
+    }
+
+    function renderSearchResults() {
+      const panel = document.getElementById("search-results-panel");
+      const grid = document.getElementById("search-results-grid");
+      const summary = document.getElementById("search-results-summary");
+      const clearBtn = document.getElementById("btn-clear-search");
+      const t = TRANSLATIONS[state.lang];
+
+      setText("search-results-title", t.matchedHeading);
+
+      if (state.matchedResults === null) {
+        panel.classList.add("hidden");
+        clearBtn.classList.add("hidden");
+        clearBtn.classList.remove("inline-flex");
+        return;
+      }
+
+      panel.classList.remove("hidden");
+      clearBtn.classList.remove("hidden");
+      clearBtn.classList.add("inline-flex");
+
+      const count = state.matchedResults.length;
+      summary.textContent = state.lang === "ta"
+        ? `"${state.lastSearchQuery}" சிச்சுவேஷனுக்கு ${count} பாடல்கள் கண்டறியப்பட்டன`
+        : `Found ${count} matching track(s) for "${state.lastSearchQuery}"`;
+
+      if (count === 0) {
+        grid.innerHTML = `
+          <div class="col-span-2 text-center py-8 bg-slate-950/70 rounded-2xl border border-slate-800 p-4">
+            <p class="text-sm text-slate-300 font-semibold">
+              ${state.lang === "ta"
+                ? "இந்த சிச்சுவேஷனுக்குப் பொருத்தமான பாடல் இன்னும் அப்லோட் செய்யப்படவில்லை. மேலே உள்ள '+ Upload' பட்டனை அழுத்தி புதிய பாடலைச் சேர்க்கவும்!"
+                : "No exact match found for this situation yet. Click '+ Upload' above to add a song for this scene!"}
+            </p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = state.matchedResults.map(match => {
+        const song = state.songs.find(s => s.id === match.songId);
+        if (!song) return "";
+        const isPlaying = state.playingSongId === song.id;
+        const reasonText = state.lang === "ta" ? (match.reasonTa || match.reasonEn) : (match.reasonEn || match.reasonTa);
+
+        const badgeClass = song.genre === "Melody"
+          ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/30"
+          : song.genre === "Folk"
+          ? "bg-amber-500/20 text-amber-300 border-amber-500/30"
+          : "bg-rose-500/20 text-rose-300 border-rose-500/30";
+
+        return `
+          <div class="rounded-2xl p-4 border transition-all flex flex-col justify-between ${
+            isPlaying
+              ? "bg-gradient-to-r from-amber-950/70 to-slate-900 border-amber-400 shadow-lg shadow-amber-500/15"
+              : "bg-slate-950/90 border-slate-800 hover:border-amber-500/50"
+          }">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${badgeClass}">
+                  ${song.genre} Song
+                </span>
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                  ${match.matchScore}% Match
+                </span>
+              </div>
+              <h4 class="text-base font-extrabold text-white">${song.title}</h4>
+              <p class="text-xs text-amber-200/95 mt-2 bg-amber-500/10 border border-amber-500/25 rounded-xl p-2.5 leading-relaxed">
+                <strong class="text-amber-400">${t.whyMatchPrefix}</strong> ${reasonText}
+              </p>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between gap-3">
+              <button
+                onclick="window.appActions.togglePlay('${song.id}')"
+                class="flex-1 py-2.5 px-4 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 transition-all ${
+                  isPlaying
+                    ? "bg-amber-400 text-slate-950 shadow-md"
+                    : "bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-white"
+                }"
+              >
+                <span>${isPlaying ? "⏸ " + t.playingNow : "▶ " + t.playForDirector}</span>
+              </button>
+              <button
+                onclick="window.appActions.toggleShortlist('${song.id}')"
+                class="p-2.5 rounded-xl border transition-all ${
+                  song.shortlisted
+                    ? "bg-amber-500/20 border-amber-400 text-amber-300"
+                    : "bg-slate-900 border-slate-700 text-slate-400 hover:text-white"
+                }"
+                title="Shortlist"
+              >
+                ★
+              </button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderCatalogGrid() {
+      const grid = document.getElementById("catalog-grid");
+      if (!grid) return;
+      const t = TRANSLATIONS[state.lang];
+
+      let list = state.songs;
+      if (state.activeCategory === "Shortlist") {
+        list = list.filter(s => s.shortlisted);
+      } else if (state.activeCategory !== "All") {
+        list = list.filter(s => s.genre === state.activeCategory);
+      }
+
+      if (list.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full text-center py-12 bg-slate-900/50 rounded-3xl border border-slate-800 p-6">
+            <p class="text-sm text-slate-400">
+              ${state.lang === "ta"
+                ? "இந்தப் பிரிவில் பாடல்கள் இல்லை. '+ Upload' பட்டனை கிளிக் செய்து புதிய பாடலைச் சேர்க்கவும்."
+                : "No songs in this category yet. Click '+ Upload' to add a track."}
+            </p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = list.map(song => {
+        const isPlaying = state.playingSongId === song.id;
+        const situationText = state.lang === "ta"
+          ? (song.situationTa || song.situationEn)
+          : (song.situationEn || song.situationTa);
+
+        const genreBadge = song.genre === "Melody"
+          ? "border-cyan-500/30 bg-cyan-500/15 text-cyan-300"
+          : song.genre === "Folk"
+          ? "border-amber-500/30 bg-amber-500/15 text-amber-300"
+          : "border-rose-500/30 bg-rose-500/15 text-rose-300";
+
+        const statusLabel = song.status === "Approved"
+          ? t.statusApproved
+          : song.status === "In Progress"
+          ? t.statusProgress
+          : t.statusRemix;
+
+        const statusClass = song.status === "Approved"
+          ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
+          : song.status === "In Progress"
+          ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
+          : "bg-rose-500/15 text-rose-300 border-rose-500/30";
+
+        const eqBars = [25, 55, 80, 40, 92, 65, 45, 85, 55, 95, 60, 35, 78, 50, 72, 42, 64, 38].map((h, i) => {
+          const barHeight = isPlaying ? Math.max(22, (h + state.playbackProgress * 5 + i * 7) % 100) : Math.round(h * 0.38);
+          return `<div class="eq-bar flex-1 rounded-full ${isPlaying ? "bg-amber-400" : "bg-slate-700"}" style="height:${barHeight}%"></div>`;
+        }).join("");
+
+        return `
+          <div class="group rounded-2xl p-5 border transition-all flex flex-col justify-between ${
+            isPlaying
+              ? "bg-gradient-to-b from-slate-900 via-[#151c2e] to-slate-900 border-amber-400 shadow-xl shadow-amber-500/15"
+              : "bg-slate-900/75 hover:bg-slate-900 border-slate-800/90 hover:border-slate-700"
+          }">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="px-3 py-1 rounded-full text-xs font-bold border ${genreBadge}">
+                  ${song.genre}
+                </span>
+
+                <div class="flex items-center gap-1.5">
+                  <button
+                    onclick="window.appActions.cycleStatus('${song.id}')"
+                    class="px-2.5 py-1 rounded-lg text-[11px] font-semibold border ${statusClass}"
+                    title="Click to change approval status"
+                  >
+                    ✓ ${statusLabel}
+                  </button>
+
+                  <button
+                    onclick="window.appActions.toggleShortlist('${song.id}')"
+                    class="px-2 py-1 rounded-lg border text-xs transition-colors ${
+                      song.shortlisted
+                        ? "bg-amber-500/20 border-amber-400 text-amber-300"
+                        : "bg-slate-800/60 border-slate-700 text-slate-400 hover:text-white"
+                    }"
+                    title="Bookmark to Director Shortlist"
+                  >
+                    ★
+                  </button>
+
+                  ${!state.pitchMode ? `
+                    <button
+                      onclick="window.appActions.deleteSong('${song.id}')"
+                      class="px-2 py-1 rounded-lg bg-slate-800/60 hover:bg-rose-500/20 border border-slate-700 hover:border-rose-500/40 text-slate-400 hover:text-rose-300 text-xs transition-colors"
+                      title="Delete Song"
+                    >
+                      ✕
+                    </button>
+                  ` : ""}
+                </div>
+              </div>
+
+              <h3 class="text-lg font-extrabold text-white group-hover:text-amber-300 transition-colors">
+                ${song.title}
+              </h3>
+
+              <div class="mt-2.5 p-3 rounded-xl bg-slate-950/85 border border-slate-800/90">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-amber-400 block mb-1">
+                  ${t.sceneSituationLabel}
+                </span>
+                <p class="text-xs text-slate-200 leading-relaxed">
+                  ${situationText}
+                </p>
+              </div>
+
+              <div class="mt-3 flex flex-wrap gap-1.5">
+                ${(song.tags || []).slice(0, 8).map(tag => `
+                  <span
+                    onclick="window.appActions.searchByTag('${tag.replace(/'/g, "")}')"
+                    class="cursor-pointer px-2 py-0.5 rounded-md text-[11px] bg-slate-800/90 hover:bg-amber-500/20 text-slate-300 hover:text-amber-300 border border-slate-700/70 transition-colors"
+                  >
+                    #${tag}
+                  </span>
+                `).join("")}
+              </div>
+
+              <div class="mt-3 flex flex-wrap items-center gap-3 text-[11px] text-slate-400">
+                <span>⚡ ${song.bpm || 90} BPM</span>
+                <span>•</span>
+                <span>🎵 ${song.raga || "Studio Scale"}</span>
+              </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-slate-800/80">
+              <div class="flex items-end gap-1 h-6 mb-3 px-1">
+                ${eqBars}
+              </div>
+
+              <button
+                onclick="window.appActions.togglePlay('${song.id}')"
+                class="w-full py-2.5 px-4 rounded-xl font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all ${
+                  isPlaying
+                    ? "bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 shadow-lg shadow-amber-500/20"
+                    : "bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-slate-100"
+                }"
+              >
+                <span>${isPlaying ? "⏸ " + t.playingNow : "▶ " + t.playForDirector + " (" + (song.duration || "3:30") + ")"}</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderBottomPlayer() {
+      const bar = document.getElementById("bottom-player-bar");
+      const discIcon = document.getElementById("header-disc-icon");
+      if (!bar) return;
+
+      const activeSong = state.songs.find(s => s.id === state.playingSongId);
+      if (!activeSong) {
+        bar.classList.add("hidden");
+        if (discIcon) discIcon.classList.remove("animate-spin-slow");
+        return;
+      }
+
+      bar.classList.remove("hidden");
+      if (discIcon) discIcon.classList.add("animate-spin-slow");
+
+      setText("player-song-title", activeSong.title);
+      setText("player-song-genre", activeSong.genre);
+      setText("player-song-situation", state.lang === "ta" ? (activeSong.situationTa || activeSong.situationEn) : (activeSong.situationEn || activeSong.situationTa));
+      setText("player-song-bpm", `${activeSong.bpm || 90} BPM`);
+
+      const prog = document.getElementById("player-progress-bar");
+      if (prog) prog.style.width = `${state.playbackProgress}%`;
+    }
+
+    function renderAll() {
+      renderStaticTranslations();
+      renderQuickChips();
+      renderCountsAndTabs();
+      renderSearchResults();
+      renderCatalogGrid();
+      renderBottomPlayer();
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    // ==========================================
+    // 9. INTERACTIVE USER ACTIONS
+    // ==========================================
+    window.appActions = {
+      toggleLanguage() {
+        state.lang = state.lang === "ta" ? "en" : "ta";
+        renderAll();
+        showToast(state.lang === "ta" ? "தமிழ் மொழிக்கு மாற்றப்பட்டது (Tamil UI Active)" : "Switched to English UI");
+      },
+
+      setCategory(cat) {
+        state.activeCategory = cat;
+        renderAll();
+      },
+
+      togglePitchMode() {
+        state.pitchMode = !state.pitchMode;
+        renderAll();
+        showToast(state.pitchMode
+          ? (state.lang === "ta" ? "இயக்குநர் பிட்ச் மோட் ஆன் செய்யப்பட்டது" : "Director Pitch Mode ON")
+          : (state.lang === "ta" ? "ஸ்டுடியோ அட்மின் மோட்" : "Studio Admin Mode Restored"));
+      },
+
+      handleLiveInput(val) {
+        state.lastSearchQuery = val;
+        if (!val.trim()) {
+          state.matchedResults = null;
+          renderSearchResults();
+          return;
+        }
+        state.matchedResults = matchSongsForSituation(val);
+        renderSearchResults();
+      },
+
+      handleSearchSubmit(e) {
+        if (e) e.preventDefault();
+        const input = document.getElementById("situation-search-input");
+        const q = input ? input.value : "";
+        state.lastSearchQuery = q;
+        if (!q.trim()) {
+          state.matchedResults = null;
+          renderSearchResults();
+          return;
+        }
+        state.matchedResults = matchSongsForSituation(q);
+        renderSearchResults();
+        enhanceSearchWithGemini(q);
+      },
+
+      runQuickChip(idx) {
+        const chip = QUICK_CHIPS[idx];
+        if (!chip) return;
+        const input = document.getElementById("situation-search-input");
+        if (input) input.value = chip.query;
+        state.lastSearchQuery = chip.query;
+        state.matchedResults = matchSongsForSituation(chip.query);
+        renderSearchResults();
+      },
+
+      searchByTag(tag) {
+        const input = document.getElementById("situation-search-input");
+        if (input) input.value = tag;
+        state.lastSearchQuery = tag;
+        state.matchedResults = matchSongsForSituation(tag);
+        renderSearchResults();
+        window.scrollTo({ top: 180, behavior: "smooth" });
+      },
+
+      clearSearch() {
+        const input = document.getElementById("situation-search-input");
+        if (input) input.value = "";
+        state.lastSearchQuery = "";
+        state.matchedResults = null;
+        renderSearchResults();
+      },
+
+      stopPlayback() {
+        synthEngine.stop();
+        const audioEl = document.getElementById("studio-audio-player");
+        if (audioEl) {
+          audioEl.pause();
+          audioEl.currentTime = 0;
+        }
+        if (progressTimer) clearInterval(progressTimer);
+        state.playingSongId = null;
+        state.playbackProgress = 0;
+        renderAll();
+      },
+
+      togglePlay(songId) {
+        if (state.playingSongId === songId) {
+          this.stopPlayback();
+          return;
+        }
+
+        const song = state.songs.find(s => s.id === songId);
+        if (!song) return;
+
+        this.stopPlayback();
+        state.playingSongId = song.id;
+        state.playbackProgress = 12;
+
+        const audioEl = document.getElementById("studio-audio-player");
+        const customUrl = state.localAudioBlobs[song.id] || song.audioBlobUrl;
+
+        if (customUrl && audioEl) {
+          audioEl.src = customUrl;
+          audioEl.muted = state.isMuted;
+          audioEl.play().catch(() => {
+            synthEngine.playPreset(song.synthPreset || "melody_rain", song.bpm || 90);
+          });
+        } else {
+          const fallbackPreset = song.genre === "Folk" ? "folk_kuthu" : song.genre === "Bhakti" ? "bhakti_climax" : "melody_rain";
+          synthEngine.setVolume(state.isMuted ? 0 : 0.75);
+          synthEngine.playPreset(song.synthPreset || fallbackPreset, song.bpm || 90);
+        }
+
+        progressTimer = setInterval(() => {
+          state.playbackProgress = state.playbackProgress >= 100 ? 5 : state.playbackProgress + 3;
+          renderBottomPlayer();
+          renderCatalogGrid();
+        }, 650);
+
+        renderAll();
+      },
+
+      toggleActivePlayer() {
+        if (state.playingSongId) {
+          this.stopPlayback();
+        }
+      },
+
+      toggleMute() {
+        state.isMuted = !state.isMuted;
+        synthEngine.setVolume(state.isMuted ? 0 : 0.75);
+        const audioEl = document.getElementById("studio-audio-player");
+        if (audioEl) audioEl.muted = state.isMuted;
+        showToast(state.isMuted ? "Audio Muted" : "Audio Unmuted");
+      },
+
+      async toggleShortlist(songId) {
+        const target = state.songs.find(s => s.id === songId);
+        if (!target) return;
+        target.shortlisted = !target.shortlisted;
+        renderAll();
+        showToast(target.shortlisted ? "★ Shortlist-ல் சேர்க்கப்பட்டது" : "Shortlist-ல் இருந்து நீக்கப்பட்டது");
+
+        if (state.user && state.db) {
+          try {
+            const dRef = doc(state.db, "artifacts", state.appId, "public", "data", "studio_songs_v2", songId);
+            await updateDoc(dRef, { shortlisted: target.shortlisted });
+          } catch (e) {}
+        }
+      },
+
+      async cycleStatus(songId) {
+        if (state.pitchMode) return;
+        const target = state.songs.find(s => s.id === songId);
+        if (!target) return;
+        const order = ["Approved", "In Progress", "Needs Remix"];
+        target.status = order[(order.indexOf(target.status) + 1) % order.length];
+        renderAll();
+
+        if (state.user && state.db) {
+          try {
+            const dRef = doc(state.db, "artifacts", state.appId, "public", "data", "studio_songs_v2", songId);
+            await updateDoc(dRef, { status: target.status });
+          } catch (e) {}
+        }
+      },
+
+      async deleteSong(songId) {
+        if (state.playingSongId === songId) this.stopPlayback();
+        state.songs = state.songs.filter(s => s.id !== songId);
+        if (state.matchedResults) {
+          state.matchedResults = state.matchedResults.filter(m => m.songId !== songId);
+        }
+        renderAll();
+        showToast("பாடல் நீக்கப்பட்டது (Song Removed)");
+
+        if (state.user && state.db) {
+          try {
+            const dRef = doc(state.db, "artifacts", state.appId, "public", "data", "studio_songs_v2", songId);
+            await deleteDoc(dRef);
+          } catch (e) {}
+        }
+      },
+
+      // Upload Modal Actions
+      openUploadModal(defaultGenre = "Melody") {
+        this.setUploadGenre(defaultGenre || "Melody");
+        document.getElementById("upload-input-title").value = "";
+        document.getElementById("upload-input-situation").value = "";
+        document.getElementById("upload-input-raga").value = "";
+        document.getElementById("upload-input-tags").value = "";
+        document.getElementById("upload-file-name-label").textContent = "MP3 / WAV ஆடியோ ஃபைலைத் தேர்ந்தெடுக்க கிளிக் செய்யவும்";
+        state.pendingAudioBlobUrl = "";
+        state.pendingAudioFileName = "";
+
+        const modal = document.getElementById("upload-modal");
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+      },
+
+      closeUploadModal() {
+        const modal = document.getElementById("upload-modal");
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+      },
+
+      setUploadGenre(genre) {
+        state.uploadGenre = genre;
+        ["Melody", "Folk", "Bhakti"].forEach(g => {
+          const btn = document.getElementById(`upload-cat-${g}`);
+          if (!btn) return;
+          if (g === genre) {
+            btn.className = "py-2.5 px-3 rounded-xl font-extrabold text-xs border bg-amber-500 text-slate-950 border-amber-400 shadow-md";
+          } else {
+            btn.className = "py-2.5 px-3 rounded-xl font-bold text-xs border bg-slate-950 text-slate-300 border-slate-800";
+          }
+        });
+        const bpmInput = document.getElementById("upload-input-bpm");
+        if (bpmInput) bpmInput.value = genre === "Folk" ? 126 : genre === "Bhakti" ? 110 : 84;
+      },
+
+      handleFileSelect(e) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        state.pendingAudioBlobUrl = URL.createObjectURL(file);
+        state.pendingAudioFileName = file.name;
+        document.getElementById("upload-file-name-label").textContent = `Selected: ${file.name}`;
+        const titleInput = document.getElementById("upload-input-title");
+        if (titleInput && !titleInput.value) {
+          titleInput.value = file.name.replace(/\.[^/.]+$/, "");
+        }
+      },
+
+      autoFillSituationTags() {
+        const genre = state.uploadGenre;
+        const sitInput = document.getElementById("upload-input-situation");
+        const tagsInput = document.getElementById("upload-input-tags");
+        const ragaInput = document.getElementById("upload-input-raga");
+
+        if (genre === "Melody") {
+          if (!sitInput.value) sitInput.value = "ஹீரோ ஹீரோயின் காதல் மழை இரவு காட்சி (Romantic rainy night love melody scene, kadhal mazhai)";
+          tagsInput.value = "காதல், மழை, மெலடி, Love, Rain, Kadhal, Mazhai, Romance";
+          ragaInput.value = "Reethigowla / ரீதிகௌளை (C Minor)";
+        } else if (genre === "Folk") {
+          if (!sitInput.value) sitInput.value = "ஹீரோ மாஸ் ஓபனிங் கிராமத்து திருவிழா குத்து பாடல் (Hero mass intro village festival kuthu dance)";
+          tagsInput.value = "குத்து, மாஸ், கிராமம், திருவிழா, Folk, Kuthu, Mass, Village, Urumi";
+          ragaInput.value = "Folk Pentatonic / நாட்டுப்புற தாளம்";
+        } else {
+          if (!sitInput.value) sitInput.value = "கோவில் திருவிழா கிளைமாக்ஸ் அம்மன் அருள் பக்தி பாடல் (Kovil thiruvizha temple festival climax Amman bhakti)";
+          tagsInput.value = "கோவில், திருவிழா, பக்தி, அம்மன், கிளைமாக்ஸ், Kovil, Thiruvizha, Bhakti, Amman, Temple";
+          ragaInput.value = "Simhendramadhyamam / சிம்மேந்திரமத்யமம்";
+        }
+        showToast("AI Auto-Filled Tamil & English Situation Tags!");
+      },
+
+      async submitUploadForm(e) {
+        e.preventDefault();
+        const title = document.getElementById("upload-input-title").value.trim();
+        const situation = document.getElementById("upload-input-situation").value.trim();
+        const bpm = Number(document.getElementById("upload-input-bpm").value) || 90;
+        const raga = document.getElementById("upload-input-raga").value.trim() || "Studio Custom Scale";
+        const rawTags = document.getElementById("upload-input-tags").value;
+
+        if (!title || !situation) return;
+
+        const songId = `mk-${state.uploadGenre.toLowerCase()}-${Date.now()}`;
+        const tags = rawTags
+          ? rawTags.split(",").map(t => t.trim()).filter(Boolean)
+          : [state.uploadGenre, "காதல்", "திருவிழா", "Studio AI"];
+
+        const presetMap = { Melody: "melody_rain", Folk: "folk_kuthu", Bhakti: "bhakti_climax" };
+
+        const newSong = {
+          id: songId,
+          title,
+          genre: state.uploadGenre,
+          situationTa: situation,
+          situationEn: situation,
+          tags,
+          bpm,
+          raga,
+          duration: "3:35",
+          status: "Approved",
+          shortlisted: false,
+          synthPreset: presetMap[state.uploadGenre] || "melody_rain",
+          createdAt: Date.now()
+        };
+
+        if (state.pendingAudioBlobUrl) {
+          state.localAudioBlobs[songId] = state.pendingAudioBlobUrl;
+        }
+
+        state.songs.unshift(newSong);
+        state.activeCategory = state.uploadGenre;
+        this.closeUploadModal();
+        renderAll();
+        showToast(`"${title}" கிளவுடில் சேமிக்கப்பட்டது (${state.uploadGenre} Vault)!`);
+
+        if (state.user && state.db) {
+          try {
+            const dRef = doc(state.db, "artifacts", state.appId, "public", "data", "studio_songs_v2", songId);
+            await setDoc(dRef, newSong);
+          } catch (err) {}
+        }
+      },
+
+      // AI Lyrics Modal
+      openLyricsModal() {
+        const m = document.getElementById("lyrics-modal");
+        m.classList.remove("hidden");
+        m.classList.add("flex");
+      },
+
+      closeLyricsModal() {
+        const m = document.getElementById("lyrics-modal");
+        m.classList.add("hidden");
+        m.classList.remove("flex");
+      },
+
+      async generateHookLyrics(e) {
+        e.preventDefault();
+        const prompt = document.getElementById("lyrics-prompt-input").value.trim();
+        if (!prompt) return;
+
+        const outBox = document.getElementById("lyrics-output-box");
+        outBox.classList.remove("hidden");
+        setText("lyrics-out-tamil", "பல்லவி வரிகள் உருவாக்கப்படுகின்றன...");
+        setText("lyrics-out-tanglish", "Composing Pallavi hook lines...");
+        setText("lyrics-out-music", "");
+
+        try {
+          const apiKey = "";
+          const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+          const payload = {
+            contents: [{
+              role: "user",
+              parts: [{
+                text: `Generate a catchy 4-line Tamil cinema song Pallavi in Tamil script and Tanglish for this movie situation: "${prompt}". Also suggest BPM and Raga.`
+              }]
+            }],
+            generationConfig: {
+              responseMimeType: "application/json",
+              responseSchema: {
+                type: "OBJECT",
+                properties: {
+                  tamilLines: { type: "STRING" },
+                  tanglishLines: { type: "STRING" },
+                  musicNotes: { type: "STRING" }
+                },
+                propertyOrdering: ["tamilLines", "tanglishLines", "musicNotes"]
+              }
+            }
+          };
+
+          const res = await fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          const parsed = JSON.parse(data.candidates[0].content.parts[0].text);
+          setText("lyrics-out-tamil", parsed.tamilLines);
+          setText("lyrics-out-tanglish", parsed.tanglishLines);
+          setText("lyrics-out-music", `🎵 இசை குறிப்பு: ${parsed.musicNotes}`);
+        } catch (err) {
+          setText("lyrics-out-tamil", "மழைத் துளி விழும் நேரத்திலே,\nமனசுக்குள் ஒரு புது ராகமே!");
+          setText("lyrics-out-tanglish", "Mazhai thuli vizhum nerathile,\nManasukkul oru puthu raagame!");
+          setText("lyrics-out-music", "🎵 இசை குறிப்பு: 86 BPM | ரீதிகௌளை (Reethigowla) - Flute & Acoustic Guitar");
+        }
+      },
+
+      // GitHub Help & Standalone HTML Download
+      openGithubHelpModal() {
+        const m = document.getElementById("github-modal");
+        m.classList.remove("hidden");
+        m.classList.add("flex");
+      },
+
+      closeGithubHelpModal() {
+        const m = document.getElementById("github-modal");
+        m.classList.add("hidden");
+        m.classList.remove("flex");
+      },
+
+      downloadStandaloneHtml() {
+        const fullHtml = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+        const blob = new Blob([fullHtml], { type: "text/html;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "index.html";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast("index.html டவுன்லோட் செய்யப்பட்டது! இதை அப்படியே GitHub-ல் போடலாம்.");
+      }
+    };
+
+    // Initialize Application on Load
+    window.addEventListener("DOMContentLoaded", () => {
+      renderAll();
+      initCloudStorage();
+    });
+  </script>
+</body>
+</html>
